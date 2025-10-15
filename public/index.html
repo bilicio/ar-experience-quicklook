@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visualizar em AR (USDZ + GLB)</title>
+
+  <!-- model-viewer (carrega do UNPKG) -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: #0f1115;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #e6edf3;
+    }
+    .wrap {
+      width: min(92vw, 720px);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #141821;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    header, footer { padding: 1rem 1.25rem; }
+    header h1 { font-size: clamp(1.05rem, 1.2vw + .9rem, 1.25rem); margin: 0; color: #fff; }
+    .viewer {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #0b0f17;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      --poster-color: transparent;
+    }
+    /* Botão AR custom (substitui o padrão) */
+    .ar-btn {
+      position: absolute;
+      right: .85rem;
+      bottom: .85rem;
+      padding: .75rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.1);
+      backdrop-filter: blur(8px);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: .55rem;
+      transition: transform .18s ease;
+      z-index: 3;
+    }
+    .ar-btn:hover { transform: translateY(-1px) scale(1.02); }
+    .ar-btn svg { width: 18px; height: 18px; }
+
+    /* Sobreposição de poster manual para clique (caso queira manter a “imagem para clicar”) */
+    .poster-overlay {
+      position: absolute; inset: 0;
+      z-index: 2;
+      display: grid; place-items: center;
+      background: #0b0f17;
+    }
+    .poster-overlay img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      user-select: none;
+    }
+    .poster-overlay.hidden { display: none; }
+
+    .hint {
+      font-size: .9rem; color: #a4adba;
+    }
+    .fallback { margin-top: .35rem; font-size: .85rem; color: #8b949e; }
+  </style>
+</head>
+<body>
+  <main class="wrap" role="main" aria-label="Visualização AR de um modelo 3D">
+    <header><h1>Visualizar em Realidade Aumentada</h1></header>
+
+    <section class="viewer">
+      <!--
+        model-viewer tenta AR automaticamente:
+        - iOS: usa Quick Look com ios-src (.usdz)
+        - Android: usa Scene Viewer
+        - Desktop: tenta WebXR; senão, mostra visor 3D
+      -->
+      <model-viewer id="mv"
+        src="modelo.glb"
+        ios-src="duck.usdz"
+        ar
+        ar-modes="quick-look scene-viewer webxr"
+        ar-scale="fixed"              <!-- 'fixed' mantém escala real; use 'auto' se preferir -->
+        camera-controls
+        touch-action="pan-y"
+        exposure="1"
+        shadow-intensity="1"
+        tone-mapping="aces"
+        environment-image="neutral"
+        poster="capa.jpg"
+        reveal="interaction"          <!-- só carrega o 3D após interação -->
+        alt="Modelo 3D para visualizar em AR">
+        <!-- Botão AR custom -->
+        <button slot="ar-button" class="ar-btn" id="arBtn" type="button" aria-label="Abrir em AR">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke-width="1.5"/>
+            <path d="M12 22V12M21 7l-9 5-9-5" stroke-width="1.5"/>
+          </svg>
+          Ver em AR
+        </button>
+      </model-viewer>
+
+      <!-- Poster clicável (imagem). Ao clicar, tenta abrir AR; se não suportar, apenas revela o modelo. -->
+      <div class="poster-overlay" id="poster">
+        <img src="duck.png" alt="Clique para visualizar em AR" />
+      </div>
+    </section>
+
+    <footer>
+      <div class="hint">
+        Toque na imagem para abrir em AR (iPhone/iPad com Safari ou Android com Scene Viewer).
+        <div class="fallback" id="fallback"></div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Âncora opcional dedicada ao Quick Look (usada como último fallback no iOS) -->
+  <a id="qlLink" rel="ar" href="modelo.usdz" style="display:none;"></a>
+
+  <script>
+    (function () {
+      const mv = document.getElementById('mv');
+      const poster = document.getElementById('poster');
+      const fallback = document.getElementById('fallback');
+      const qlLink = document.getElementById('qlLink');
+      const ua = navigator.userAgent || "";
+      const isIOS = /iPad|iPhone|iPod/.test(ua);
+      const isMacWithTouch = /Macintosh/.test(ua) && 'ontouchend' in document;
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+      const supportsQuickLook = (isIOS || isMacWithTouch) && isSafari;
+
+      // texto de ajuda por plataforma
+      if (!('AR' in window)) {
+        // Heurística simples; model-viewer detecta internamente também
+        fallback.textContent = "Se o AR não abrir automaticamente, seu aparelho pode baixar o arquivo ou mostrar o modelo em 3D sem AR.";
+      }
+
+      // Clique no poster: tenta abrir AR primeiro; se não rolar, revela o 3D.
+      const tryAR = async () => {
+        // Tenta via API do model-viewer.
+        if (mv?.canActivateAR && mv.canActivateAR) {
+          try { await mv.activateAR(); return; } catch {}
+        }
+        // Em iOS Safari, força Quick Look via link oculto.
+        if (supportsQuickLook && qlLink) {
+          qlLink.click();
+          return;
+        }
+        // Se nada deu, só revela o modelo (remove poster).
+        poster?.classList.add('hidden');
+        try { await mv?.dismissPoster?.(); } catch {}
+      };
+
+      poster?.addEventListener('click', tryAR);
+      // Botão AR também tenta o AR
+      document.getElementById('arBtn')?.addEventListener('click', tryAR);
+
+      // Se o usuário tocar no pôster nativo do model-viewer, esconda nossa overlay
+      mv?.addEventListener('poster-visibility', (ev) => {
+        if (ev.detail.visible === false) poster?.classList.add('hidden');
+      });
+
+      // Opcional: ao carregar o 3D (sem AR), esconder overlay
+      mv?.addEventListener('load', () => {
+        // se o glTF carregar (usuário sem AR), garantimos que a overlay some
+        poster?.classList.add('hidden');
+      });
+    })();
+  </script>
+</body>
+</html>
