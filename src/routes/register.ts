@@ -21,5 +21,5 @@ export const registerRoute = (req: Request, res: Response) => {
   })
 
   // Redireciona para a home (URL limpa, sem parâmetros)
-  res.redirect('/')
+  res.redirect('/aiexperience/')
 }
