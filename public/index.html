@@ -83,7 +83,7 @@
 </head>
 <body>
   <main class="wrap" role="main" aria-label="Visualização AR de um modelo 3D">
-    <header><h1>Visualizar em Realidade Aumentada</h1></header>
+    <header><h1>Esse é o Bingo da 42 São Paulo! Tire as fotos correspondentes e concorra a prêmios!</h1></header>
 
     <section class="viewer">
       <!--
@@ -97,7 +97,7 @@
         ios-src="./duck.usdz"
         ar
         ar-modes="quick-look scene-viewer webxr"
-        ar-scale="fixed"              <!-- 'fixed' mantém escala real; use 'auto' se preferir -->
+        ar-scale="fixed"            
         camera-controls
         touch-action="pan-y"
         exposure="1"
@@ -105,7 +105,7 @@
         tone-mapping="aces"
         environment-image="neutral"
         poster="capa.jpg"
-        reveal="interaction"          <!-- só carrega o 3D após interação -->
+        reveal="interaction"         
         alt="Modelo 3D para visualizar em AR">
         <!-- Botão AR custom -->
         <button slot="ar-button" class="ar-btn" id="arBtn" type="button" aria-label="Abrir em AR">
@@ -149,7 +149,7 @@
       // texto de ajuda por plataforma
       if (!('AR' in window)) {
         // Heurística simples; model-viewer detecta internamente também
-        fallback.textContent = "Se o AR não abrir automaticamente, seu aparelho pode baixar o arquivo ou mostrar o modelo em 3D sem AR.";
+        fallback.textContent = "Se o AR não abrir automaticamente, seu aparelho pode não ser compatível";
       }
 
       // Clique no poster: tenta abrir AR primeiro; se não rolar, revela o 3D.

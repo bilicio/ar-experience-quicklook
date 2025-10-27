@@ -9,8 +9,10 @@ import express, {
   notFound,
   errorHandler
 } from '@feathersjs/express'
+import { Router } from 'express'
 import configuration from '@feathersjs/configuration'
 import socketio from '@feathersjs/socketio'
+import cookieParser from 'cookie-parser'
 
 import type { Application } from './declarations'
 import { configurationValidator } from './configuration'
@@ -18,6 +20,8 @@ import { logger } from './logger'
 import { logError } from './hooks/log-error'
 import { services } from './services/index'
 import { channels } from './channels'
+import { checkAccessCookie } from './middleware/auth-cookie'
+import { registerRoute } from './routes/register'
 
 const app: Application = express(feathers())
 
@@ -26,6 +30,22 @@ app.configure(configuration(configurationValidator))
 app.use(cors())
 app.use(json())
 app.use(urlencoded({ extended: true }))
+app.use(cookieParser())
+
+// Router Express para rotas customizadas
+const router = Router()
+router.get('/register', registerRoute)
+app.use(router)
+
+// Middleware condicional: verifica cookie apenas para requisições à raiz (index.html)
+app.use((req, res, next) => {
+  // Se está acessando a raiz (/) e não é um arquivo estático
+  if (req.path === '/' || req.path === '/index.html') {
+    return checkAccessCookie(req, res, next)
+  }
+  next()
+})
+
 // Host the public folder
 app.use('/', serveStatic(app.get('public')))
 

@@ -1,0 +1,1 @@
+- Essa é uma página de uma ativação de visualização em AR, nela a pessoa tocará na imagem e vai abrir o objeto em 3D.
