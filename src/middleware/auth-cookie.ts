@@ -13,6 +13,6 @@ export const checkAccessCookie = (req: Request, res: Response, next: NextFunctio
     next()
   } else {
     // Sem cookie, redireciona para página de acesso negado
-    res.redirect('/acesso-negado.html')
+    res.redirect('/aiexperience/acesso-negado.html')
   }
 }
