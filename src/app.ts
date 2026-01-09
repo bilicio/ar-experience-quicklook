@@ -40,9 +40,9 @@ app.use(router)
 // Middleware condicional: verifica cookie apenas para requisições à raiz (index.html)
 app.use((req, res, next) => {
   // Se está acessando a raiz (/) e não é um arquivo estático
-  if (req.path === '/' || req.path === '/index.html') {
-    return checkAccessCookie(req, res, next)
-  }
+  //if (req.path === '/' || req.path === '/index.html') {
+    //return checkAccessCookie(req, res, next)
+  //}
   next()
 })
 
