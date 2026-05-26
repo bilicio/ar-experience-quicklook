@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 })
 
 // ── Proxy Claude API ──────────────────────────────────────────────
-router.post('/claude-proxy', async (req:any, res:any) => {
+app.use('/monsieur/claude-proxy', async (req: any, res: any) => {
   try {
     const { __apiKey, ...body } = req.body
 
@@ -71,6 +71,7 @@ router.post('/claude-proxy', async (req:any, res:any) => {
     res.status(500).json({ error: { message: err.message } })
   }
 })
+
 
 // Host the public folder
 app.use('/', serveStatic(app.get('public')))
