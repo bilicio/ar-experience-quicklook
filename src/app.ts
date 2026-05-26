@@ -46,6 +46,32 @@ app.use((req, res, next) => {
   next()
 })
 
+// ── Proxy Claude API ──────────────────────────────────────────────
+router.post('/claude-proxy', async (req:any, res:any) => {
+  try {
+    const { __apiKey, ...body } = req.body
+
+    if (!__apiKey || !__apiKey.startsWith('sk-ant-')) {
+      return res.status(400).json({ error: { message: 'API key inválida.' } })
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': __apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(body),
+    })
+
+    const data = await response.json()
+    res.status(response.status).json(data)
+  } catch (err: any) {
+    res.status(500).json({ error: { message: err.message } })
+  }
+})
+
 // Host the public folder
 app.use('/', serveStatic(app.get('public')))
 

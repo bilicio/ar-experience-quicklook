@@ -444,6 +444,10 @@ select { cursor:pointer; appearance:none;
 </div>
 
 <script>
+// ── PROXY CONFIG ────────────────────────────────────────────────────
+// Troque pela URL do seu Cloudflare Worker após o deploy
+const PROXY_URL = "/claude-proxy";
+
 // ── STATE ──────────────────────────────────────────────────────────
 let apiKey    = '';
 let history   = [];
@@ -576,10 +580,11 @@ async function send() {
   btn.disabled = true; showTyping();
 
   try {
-    const res  = await fetch('https://api.anthropic.com/v1/messages', {
+    const res  = await fetch(PROXY_URL, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
+        __apiKey: apiKey,
         model:'claude-sonnet-4-20250514',
         max_tokens:1500,
         system: sp,
@@ -635,10 +640,11 @@ async function exportPPTX(slug, agentName) {
   // Ask Claude to structure for PPTX
   let slides = null;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch(PROXY_URL, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
+        __apiKey: apiKey,
         model:'claude-sonnet-4-20250514', max_tokens:1200,
         messages:[{ role:'user', content:
           `Com base neste conteúdo, crie uma estrutura para uma apresentação de slides. Responda APENAS com JSON válido sem markdown:
@@ -697,9 +703,10 @@ Formato:
 async function exportXLSX(slug, agentName) {
   let tableData = null;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch(PROXY_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
+        __apiKey: apiKey,
         model:'claude-sonnet-4-20250514', max_tokens:1000,
         messages:[{role:'user',content:
           `Transforme este conteúdo em uma tabela estruturada. Responda APENAS com JSON válido:
