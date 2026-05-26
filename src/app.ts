@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 })
 
 // ── Proxy Claude API ──────────────────────────────────────────────
-app.use('/monsieur/claude-proxy', async (req: any, res: any) => {
+app.use('/claude-proxy', async (req: any, res: any) => {
   try {
     const { __apiKey, ...body } = req.body
 
