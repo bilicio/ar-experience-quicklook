@@ -585,7 +585,7 @@ async function send() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         __apiKey: apiKey,
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:1500,
         system: sp,
         messages: history
@@ -645,7 +645,7 @@ async function exportPPTX(slug, agentName) {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         __apiKey: apiKey,
-        model:'claude-sonnet-4-20250514', max_tokens:1200,
+        model:'claude-sonnet-4-6', max_tokens:1200,
         messages:[{ role:'user', content:
           `Com base neste conteúdo, crie uma estrutura para uma apresentação de slides. Responda APENAS com JSON válido sem markdown:
 ${lastOutput}
@@ -707,7 +707,7 @@ async function exportXLSX(slug, agentName) {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         __apiKey: apiKey,
-        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        model:'claude-sonnet-4-6', max_tokens:1000,
         messages:[{role:'user',content:
           `Transforme este conteúdo em uma tabela estruturada. Responda APENAS com JSON válido:
 ${lastOutput}
