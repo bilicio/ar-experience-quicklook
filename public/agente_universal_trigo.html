@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente Universal — TRIGO</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.12.0/pptxgen.bundled.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --navy:  #0A1628;
+  --teal:  #0D9488;
+  --teal2: #5EEAD4;
+  --white: #FFFFFF;
+  --bg:    #F2F5F4;
+  --card:  #FFFFFF;
+  --border:#E2E8E6;
+  --gray:  #64748B;
+  --text:  #0F172A;
+  --r:     12px;
+  --sh:    0 2px 20px rgba(10,22,40,.07);
+}
+
+body {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--navy);
+  height: 58px;
+  display: flex; align-items: center;
+  padding: 0 28px;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.hlogo { display:flex; align-items:center; gap:10px; }
+.hlogo-mark {
+  width:30px; height:30px; border-radius:8px;
+  background: var(--teal);
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px;
+}
+.hlogo-name { color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; letter-spacing:.2px; }
+.hlogo-sub  { color: var(--teal2); font-size:11px; font-weight:400; }
+.hbadge {
+  font-size:11px; font-weight:600;
+  background: rgba(13,148,136,.18);
+  color: var(--teal2);
+  padding: 4px 12px; border-radius:20px;
+  border: 1px solid rgba(13,148,136,.3);
+  letter-spacing:.4px;
+}
+
+/* ── LAYOUT ── */
+.app {
+  flex:1;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  padding: 22px 24px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* ── PANEL (left) ── */
+.panel { display:flex; flex-direction:column; gap:14px; position:sticky; top:22px; }
+
+.card {
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.card-head {
+  padding: 13px 16px;
+  display:flex; align-items:center; gap:9px;
+  border-bottom: 1px solid var(--border);
+}
+.card-head-icon {
+  width:28px; height:28px; border-radius:7px;
+  background: rgba(13,148,136,.1);
+  display:flex; align-items:center; justify-content:center; font-size:14px;
+}
+.card-head-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color: var(--navy); }
+.card-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+
+/* form elements */
+label.lbl { font-size:11.5px; font-weight:600; color: var(--gray); letter-spacing:.4px; text-transform:uppercase; display:block; margin-bottom:5px; }
+
+input[type=text], input[type=password], textarea, select {
+  width:100%; border:1.5px solid var(--border);
+  border-radius:9px; padding:9px 12px;
+  font-family:'Epilogue',sans-serif; font-size:13px;
+  color: var(--text); outline:none; background: var(--bg);
+  transition: border-color .18s, box-shadow .18s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.1);
+  background: #fff;
+}
+textarea { resize:vertical; min-height:130px; line-height:1.55; }
+select { cursor:pointer; appearance:none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position: right 12px center;
+  padding-right:36px;
+}
+
+.key-row { display:flex; gap:7px; }
+.key-row input { flex:1; font-family:monospace; font-size:12px; }
+.btn-save {
+  padding:9px 14px; border-radius:9px; border:none;
+  background: var(--teal); color:#fff;
+  font-family:'Epilogue',sans-serif; font-weight:600; font-size:12px;
+  cursor:pointer; transition: background .18s, transform .15s; white-space:nowrap;
+}
+.btn-save:hover { background:#0f766e; transform:translateY(-1px); }
+
+.alert { font-size:11.5px; padding:7px 10px; border-radius:8px; margin-top:4px; }
+.alert.ok  { background:#DCFCE7; color:#166534; }
+.alert.err { background:#FEE2E2; color:#991B1B; }
+
+/* output selector */
+.output-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.out-opt {
+  border:2px solid var(--border);
+  border-radius:9px; padding:10px 8px;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; transition: all .18s; background:#fff;
+  font-size:11.5px; font-weight:600; color: var(--gray);
+  text-align:center;
+}
+.out-opt .out-icon { font-size:22px; line-height:1; }
+.out-opt:hover { border-color: var(--teal); color: var(--teal); }
+.out-opt.selected {
+  border-color: var(--teal);
+  background: rgba(13,148,136,.07);
+  color: var(--teal);
+}
+
+/* export button */
+.btn-export {
+  width:100%; padding:13px;
+  border-radius:10px; border:none;
+  background: var(--navy); color:#fff;
+  font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+  cursor:pointer; transition: all .2s;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  letter-spacing:.3px;
+}
+.btn-export:hover { background:#1a2f47; transform:translateY(-2px); box-shadow:0 6px 20px rgba(10,22,40,.18); }
+.btn-export:disabled { background: var(--border); color: var(--gray); transform:none; box-shadow:none; cursor:not-allowed; }
+
+/* tips */
+.tip-list { display:flex; flex-direction:column; gap:7px; }
+.tip {
+  font-size:12px; color: var(--gray); line-height:1.5;
+  padding:8px 10px;
+  background: var(--bg); border-radius:8px;
+  border-left:3px solid var(--teal);
+  display:flex; gap:7px; align-items:flex-start;
+}
+.tip-n { font-weight:700; color: var(--teal); flex-shrink:0; }
+
+/* ── CHAT (right) ── */
+.chat-wrap {
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  border: 1px solid var(--border);
+  display:flex; flex-direction:column;
+  height: calc(100vh - 102px);
+  position:sticky; top:22px;
+  overflow:hidden;
+}
+
+.chat-top {
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+  background: var(--card);
+}
+.agent-av {
+  width:38px; height:38px; border-radius:10px;
+  background: linear-gradient(135deg, var(--teal), #0f766e);
+  display:flex; align-items:center; justify-content:center;
+  font-size:19px; flex-shrink:0;
+}
+.agent-nm { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; }
+.agent-rl { font-size:11px; color: var(--gray); }
+.online {
+  margin-left:auto; width:8px; height:8px; border-radius:50%;
+  background:#22C55E; box-shadow:0 0 0 3px rgba(34,197,94,.2);
+  animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+.messages {
+  flex:1; overflow-y:auto;
+  padding:18px; display:flex; flex-direction:column; gap:13px;
+  scroll-behavior:smooth;
+}
+.messages::-webkit-scrollbar{width:4px}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.msg { display:flex; gap:9px; animation:up .22s ease; }
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.msg.user { margin-left:auto; flex-direction:row-reverse; max-width:82%; }
+.msg.agent{ max-width:88%; }
+
+.av {
+  width:28px; height:28px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+.msg.agent .av { background:linear-gradient(135deg,var(--teal),#0f766e); }
+.msg.user  .av { background:var(--navy); }
+
+.bub {
+  padding:10px 14px; border-radius:12px;
+  font-size:13px; line-height:1.65;
+}
+.msg.agent .bub {
+  background: var(--bg); border:1px solid var(--border);
+  border-bottom-left-radius:3px; color: var(--text);
+}
+.msg.user .bub {
+  background: var(--navy); color:#fff;
+  border-bottom-right-radius:3px;
+}
+.bub p{margin-bottom:5px}.bub p:last-child{margin-bottom:0}
+.bub strong{font-weight:600}
+.bub ul{padding-left:16px;margin:3px 0}.bub li{margin-bottom:2px}
+.bub table{border-collapse:collapse;width:100%;margin:7px 0;font-size:11.5px}
+.bub th{background:var(--navy);color:#fff;padding:5px 8px;text-align:left}
+.bub td{padding:4px 8px;border-bottom:1px solid var(--border)}
+.bub tr:nth-child(even) td{background:rgba(0,0,0,.025)}
+.bub code{font-family:monospace;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:12px}
+
+.typing{display:flex;align-items:center;gap:4px;padding:10px 14px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;border-bottom-left-radius:3px;width:fit-content}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--teal);animation:bo 1.1s infinite}
+.typing span:nth-child(2){animation-delay:.18s}
+.typing span:nth-child(3){animation-delay:.36s}
+@keyframes bo{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* input area */
+.inp-area {
+  padding:12px 16px;
+  border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:8px;
+  background: var(--card);
+}
+.file-chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{
+  background:rgba(13,148,136,.1);border:1px solid var(--teal2);
+  color:var(--teal);font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:6px;
+  display:flex;align-items:center;gap:5px;
+}
+.fchip button{background:none;border:none;cursor:pointer;color:var(--gray);font-size:13px;line-height:1}
+.inp-row{display:flex;gap:8px;align-items:flex-end}
+.att-btn{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  border:1.5px dashed var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--gray);font-size:15px;transition:all .18s;
+}
+.att-btn:hover{border-color:var(--teal);color:var(--teal);background:rgba(13,148,136,.05)}
+#fileInput{display:none}
+.inp-area textarea{
+  flex:1;resize:none;min-height:36px;max-height:110px;
+  border:1.5px solid var(--border);border-radius:9px;
+  padding:8px 12px;font-family:'Epilogue',sans-serif;font-size:13px;
+}
+.send{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:var(--teal);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:15px;transition:all .18s;
+}
+.send:hover{background:#0f766e;transform:scale(1.06)}
+.send:disabled{background:var(--border);color:var(--gray);transform:none;cursor:not-allowed}
+
+/* empty state */
+.empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;color:var(--gray);padding:30px;text-align:center;
+}
+.empty-icon{font-size:40px;opacity:.4}
+.empty-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--navy);opacity:.5}
+.empty-sub{font-size:12.5px;line-height:1.55;max-width:260px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hlogo">
+    <div class="hlogo-mark">🤖</div>
+    <div>
+      <div class="hlogo-name">Agente Universal</div>
+      <div class="hlogo-sub">TRIGO Group — Workshop Claude API</div>
+    </div>
+  </div>
+  <div class="hbadge">WORKSHOP</div>
+</header>
+
+<div class="app">
+
+  <!-- ── PANEL ESQUERDO ── -->
+  <div class="panel">
+
+    <!-- 1. CONFIGURAR AGENTE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">🤖</div>
+        <div class="card-head-title">Configurar Agente</div>
+      </div>
+      <div class="card-body">
+        <div>
+          <label class="lbl">Nome do Agente</label>
+          <input type="text" id="agentName" placeholder="Ex: Assistente de Qualidade" value="Meu Agente" oninput="updateAgentName()">
+        </div>
+        <div>
+          <label class="lbl">System Prompt</label>
+          <textarea id="systemPrompt" placeholder="Cole aqui o system prompt criado no Workbench...&#10;&#10;Ex: Você é um assistente especializado em..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. API KEY -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">🔑</div>
+        <div class="card-head-title">API Key</div>
+      </div>
+      <div class="card-body">
+        <div class="key-row">
+          <input type="password" id="apiKey" placeholder="sk-ant-...">
+          <button class="btn-save" onclick="saveKey()">Salvar</button>
+        </div>
+        <div id="keyMsg"></div>
+      </div>
+    </div>
+
+    <!-- 3. FORMATO DE EXPORTAÇÃO -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">📤</div>
+        <div class="card-head-title">Exportar Output</div>
+      </div>
+      <div class="card-body">
+        <label class="lbl">Formato de saída</label>
+        <div class="output-grid">
+          <div class="out-opt selected" data-fmt="pptx" onclick="selectFormat(this)">
+            <div class="out-icon">📊</div>
+            <div>PPTX</div>
+          </div>
+          <div class="out-opt" data-fmt="xlsx" onclick="selectFormat(this)">
+            <div class="out-icon">📗</div>
+            <div>Excel</div>
+          </div>
+          <div class="out-opt" data-fmt="pdf" onclick="selectFormat(this)">
+            <div class="out-icon">📕</div>
+            <div>PDF</div>
+          </div>
+          <div class="out-opt" data-fmt="docx" onclick="selectFormat(this)">
+            <div class="out-icon">📘</div>
+            <div>Word</div>
+          </div>
+        </div>
+        <button class="btn-export" id="exportBtn" onclick="exportOutput()" disabled>
+          ⬇️ Exportar
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. COMO USAR -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">💡</div>
+        <div class="card-head-title">Como usar</div>
+      </div>
+      <div class="card-body">
+        <div class="tip-list">
+          <div class="tip"><span class="tip-n">1</span>Crie seu agente no Workbench e copie o system prompt</div>
+          <div class="tip"><span class="tip-n">2</span>Cole o system prompt e dê um nome ao agente acima</div>
+          <div class="tip"><span class="tip-n">3</span>Insira sua API key e salve</div>
+          <div class="tip"><span class="tip-n">4</span>Converse com o agente no chat ao lado</div>
+          <div class="tip"><span class="tip-n">5</span>Escolha o formato e clique em Exportar</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CHAT DIREITO ── -->
+  <div class="chat-wrap">
+    <div class="chat-top">
+      <div class="agent-av" id="agentAv">🤖</div>
+      <div>
+        <div class="agent-nm" id="agentNmDisplay">Meu Agente</div>
+        <div class="agent-rl">Configurado via System Prompt</div>
+      </div>
+      <div class="online" id="onlineDot" style="background:#94A3B8;box-shadow:none"></div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty" id="emptyState">
+        <div class="empty-icon">💬</div>
+        <div class="empty-title">Pronto para começar</div>
+        <div class="empty-sub">Configure seu agente no painel esquerdo, salve a API key e comece a conversar.</div>
+      </div>
+    </div>
+
+    <div class="inp-area">
+      <div class="file-chip-row" id="chipRow"></div>
+      <div class="inp-row">
+        <label class="att-btn" for="fileInput" title="Anexar arquivo">📎</label>
+        <input type="file" id="fileInput" accept=".csv,.txt,.md">
+        <textarea id="msgInput" rows="1" placeholder="Digite sua mensagem..."></textarea>
+        <button class="send" id="sendBtn" onclick="send()">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────
+let apiKey    = '';
+let history   = [];
+let attached  = null;
+let fmt       = 'pptx';
+let lastOutput = '';
+
+// ── AGENT NAME ─────────────────────────────────────────────────────
+function updateAgentName() {
+  const n = document.getElementById('agentName').value || 'Meu Agente';
+  document.getElementById('agentNmDisplay').textContent = n;
+}
+
+// ── FORMAT SELECT ──────────────────────────────────────────────────
+function selectFormat(el) {
+  document.querySelectorAll('.out-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  fmt = el.dataset.fmt;
+  const icons = { pptx:'📊 Exportar PPTX', xlsx:'📗 Exportar Excel', pdf:'📕 Exportar PDF', docx:'📘 Exportar Word' };
+  const btn = document.getElementById('exportBtn');
+  if (!btn.disabled) btn.innerHTML = `⬇️ ${icons[fmt]}`;
+}
+
+// ── API KEY ─────────────────────────────────────────────────────────
+function saveKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  const m = document.getElementById('keyMsg');
+  if (!v.startsWith('sk-ant-')) {
+    m.innerHTML = '<div class="alert err">❌ Chave inválida. Deve começar com sk-ant-</div>';
+    return;
+  }
+  apiKey = v;
+  m.innerHTML = '<div class="alert ok">✅ API key salva com sucesso!</div>';
+  document.getElementById('onlineDot').style.cssText = '';
+  setTimeout(() => m.innerHTML = '', 3000);
+  if (history.length === 0) showWelcome();
+}
+
+function showWelcome() {
+  const name = document.getElementById('agentName').value || 'Meu Agente';
+  addMsg('agent', `Olá! Sou o **${name}**.\n\nEstou pronto para ajudar. Como posso começar?`);
+}
+
+// ── FILE ────────────────────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change', function() {
+  const f = this.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    attached = { name: f.name, content: e.target.result };
+    document.getElementById('chipRow').innerHTML =
+      `<div class="fchip">📄 ${f.name} <button onclick="clearFile()">×</button></div>`;
+  };
+  r.readAsText(f); this.value = '';
+});
+function clearFile() { attached = null; document.getElementById('chipRow').innerHTML = ''; }
+
+// ── MESSAGES ───────────────────────────────────────────────────────
+function addMsg(role, text) {
+  const empty = document.getElementById('emptyState');
+  if (empty) empty.remove();
+
+  const wrap = document.getElementById('messages');
+  const div  = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const av  = document.createElement('div'); av.className  = 'av';
+  av.textContent = role === 'agent' ? '🤖' : '👤';
+
+  const bub = document.createElement('div'); bub.className = 'bub';
+  bub.innerHTML = md(text);
+
+  div.appendChild(av); div.appendChild(bub);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return bub;
+}
+
+function md(t) {
+  return '<p>' + t
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code>$1</code>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/\n/g,'<br>') + '</p>';
+}
+
+function showTyping() {
+  const wrap = document.getElementById('messages');
+  const div  = document.createElement('div');
+  div.className = 'msg agent'; div.id = 'typ';
+  const av = document.createElement('div'); av.className='av'; av.textContent='🤖';
+  const t  = document.createElement('div'); t.className='typing';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  div.appendChild(av); div.appendChild(t);
+  wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight;
+}
+function hideTyping() { const t=document.getElementById('typ'); if(t) t.remove(); }
+
+// ── SEND ────────────────────────────────────────────────────────────
+document.getElementById('msgInput').addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+document.getElementById('msgInput').addEventListener('input', function() {
+  this.style.height='auto';
+  this.style.height = Math.min(this.scrollHeight,110)+'px';
+});
+
+async function send() {
+  if (!apiKey) { alert('Insira e salve sua API key primeiro.'); return; }
+  const input = document.getElementById('msgInput');
+  const text  = input.value.trim();
+  if (!text && !attached) return;
+
+  const sp = document.getElementById('systemPrompt').value.trim();
+  if (!sp) { alert('Por favor, cole um system prompt no painel esquerdo.'); return; }
+
+  let userText = text;
+  let apiContent = text;
+  if (attached) {
+    apiContent = `${text ? text+'\n\n' : ''}[Arquivo: ${attached.name}]\n\n${attached.content}`;
+    userText   = `${text || 'Segue o arquivo:'} 📄 ${attached.name}`;
+    clearFile();
+  }
+
+  addMsg('user', userText);
+  input.value = ''; input.style.height='auto';
+  history.push({ role:'user', content: apiContent });
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true; showTyping();
+
+  try {
+    const res  = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        system: sp,
+        messages: history
+      })
+    });
+    const data = await res.json();
+    hideTyping();
+    if (data.error) throw new Error(data.error.message);
+
+    const reply = data.content[0].text;
+    history.push({ role:'assistant', content: reply });
+    lastOutput = reply;
+    addMsg('agent', reply);
+
+    // unlock export
+    document.getElementById('exportBtn').disabled = false;
+    const icons = { pptx:'📊 Exportar PPTX', xlsx:'📗 Exportar Excel', pdf:'📕 Exportar PDF', docx:'📘 Exportar Word' };
+    document.getElementById('exportBtn').innerHTML = `⬇️ ${icons[fmt]}`;
+
+  } catch(e) {
+    hideTyping();
+    addMsg('agent', `❌ Erro: ${e.message}`);
+  }
+  btn.disabled = false; input.focus();
+}
+
+// ── EXPORT ROUTER ──────────────────────────────────────────────────
+async function exportOutput() {
+  if (!lastOutput) return;
+  const name = document.getElementById('agentName').value || 'agente';
+  const slug = name.toLowerCase().replace(/\s+/g,'_');
+
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ Gerando...';
+
+  try {
+    if (fmt === 'pptx') await exportPPTX(slug, name);
+    if (fmt === 'xlsx') await exportXLSX(slug, name);
+    if (fmt === 'pdf')  await exportPDF(slug, name);
+    if (fmt === 'docx') await exportDOCX(slug, name);
+  } catch(e) {
+    alert('Erro ao gerar arquivo: ' + e.message);
+  }
+
+  btn.disabled = false;
+  const icons = { pptx:'📊 Exportar PPTX', xlsx:'📗 Exportar Excel', pdf:'📕 Exportar PDF', docx:'📘 Exportar Word' };
+  btn.innerHTML = `⬇️ ${icons[fmt]}`;
+}
+
+// ── PPTX ────────────────────────────────────────────────────────────
+async function exportPPTX(slug, agentName) {
+  // Ask Claude to structure for PPTX
+  let slides = null;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1200,
+        messages:[{ role:'user', content:
+          `Com base neste conteúdo, crie uma estrutura para uma apresentação de slides. Responda APENAS com JSON válido sem markdown:
+${lastOutput}
+
+Formato:
+{"title":"título da apresentação","slides":[{"title":"título do slide","bullets":["ponto 1","ponto 2","ponto 3"]}]}`
+        }]
+      })
+    });
+    const d = await r.json();
+    slides = JSON.parse(d.content[0].text.replace(/\`\`\`json|\`\`\`/g,'').trim());
+  } catch(e) { slides = null; }
+
+  const pres = new PptxGenJS();
+  pres.layout = 'LAYOUT_16x9';
+
+  const NAVY='0A1628', TEAL='0D9488', WHITE='FFFFFF', GRAY='94A3B8', BG='F2F5F4';
+
+  // Capa
+  const s0 = pres.addSlide();
+  s0.background={color:NAVY};
+  s0.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:.2,h:5.625,fill:{color:TEAL}});
+  s0.addShape(pres.shapes.OVAL,{x:6.5,y:-1.2,w:5,h:5,fill:{color:TEAL,transparency:88}});
+  s0.addText(agentName.toUpperCase(),{x:.5,y:1.3,w:7,h:.45,fontSize:11,color:'5EEAD4',bold:true,charSpacing:5});
+  s0.addText(slides?.title || lastOutput.split('\n')[0].slice(0,50),{x:.5,y:1.8,w:7.5,h:1.2,fontSize:38,color:WHITE,bold:true});
+  s0.addShape(pres.shapes.RECTANGLE,{x:.5,y:3.15,w:3.5,h:.04,fill:{color:TEAL}});
+  s0.addText(new Date().toLocaleDateString('pt-BR'),{x:.5,y:3.35,w:7,h:.35,fontSize:12,color:GRAY});
+
+  // Content slides
+  const slideList = slides?.slides || [{ title:'Output do Agente', bullets: lastOutput.split('\n').filter(l=>l.trim()).slice(0,8) }];
+  slideList.forEach(sl => {
+    const s = pres.addSlide();
+    s.background={color:BG};
+    s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:.78,fill:{color:NAVY}});
+    s.addText(sl.title||'',{x:.4,y:0,w:9.2,h:.78,fontSize:19,color:WHITE,bold:true,valign:'middle'});
+    (sl.bullets||[]).forEach((b,i) => {
+      s.addShape(pres.shapes.RECTANGLE,{x:.35,y:.98+i*.54,w:9.3,h:.46,fill:{color:i%2===0?WHITE:'EEF4F3'}});
+      s.addShape(pres.shapes.OVAL,{x:.42,y:1.06+i*.54,w:.22,h:.22,fill:{color:TEAL}});
+      s.addText(b,{x:.74,y:.98+i*.54,w:8.7,h:.46,fontSize:12,color:'0F172A',valign:'middle'});
+    });
+  });
+
+  // Encerramento
+  const sf = pres.addSlide();
+  sf.background={color:NAVY};
+  sf.addShape(pres.shapes.OVAL,{x:-1,y:3,w:5,h:5,fill:{color:TEAL,transparency:88}});
+  sf.addText('Gerado por',{x:.5,y:1.6,w:9,h:.4,fontSize:13,color:'5EEAD4',align:'center',bold:true,charSpacing:4});
+  sf.addText(agentName,{x:.5,y:2.1,w:9,h:.9,fontSize:34,color:WHITE,bold:true,align:'center'});
+  sf.addText('Workshop Claude API — TRIGO Group',{x:.5,y:5.0,w:9,h:.35,fontSize:10,color:GRAY,align:'center'});
+
+  await pres.writeFile({fileName:`${slug}.pptx`});
+}
+
+// ── XLSX ────────────────────────────────────────────────────────────
+async function exportXLSX(slug, agentName) {
+  let tableData = null;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user',content:
+          `Transforme este conteúdo em uma tabela estruturada. Responda APENAS com JSON válido:
+${lastOutput}
+Formato: {"headers":["Col1","Col2","Col3"],"rows":[["val1","val2","val3"]]}`
+        }]
+      })
+    });
+    const d = await r.json();
+    tableData = JSON.parse(d.content[0].text.replace(/\`\`\`json|\`\`\`/g,'').trim());
+  } catch(e) {
+    // fallback: plain text rows
+    tableData = { headers:['Conteúdo'], rows: lastOutput.split('\n').filter(l=>l.trim()).map(l=>[l]) };
+  }
+
+  const wb = XLSX.utils.book_new();
+  const rows = [tableData.headers, ...tableData.rows];
+  const ws   = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = tableData.headers.map(() => ({wch:28}));
+
+  XLSX.utils.book_append_sheet(wb, ws, agentName.slice(0,31));
+  XLSX.writeFile(wb, `${slug}.xlsx`);
+}
+
+// ── PDF ─────────────────────────────────────────────────────────────
+async function exportPDF(slug, agentName) {
+  // Build styled HTML and print to PDF via browser
+  const html = `<!DOCTYPE html><html><head>
+  <meta charset="UTF-8">
+  <style>
+    body{font-family:Georgia,serif;max-width:720px;margin:40px auto;color:#0F172A;line-height:1.7}
+    h1{font-size:26px;color:#0A1628;border-bottom:3px solid #0D9488;padding-bottom:10px;margin-bottom:6px}
+    .meta{font-size:12px;color:#64748B;margin-bottom:28px}
+    h2{font-size:18px;color:#0A1628;margin-top:24px}
+    p{margin:8px 0;font-size:14px}
+    table{width:100%;border-collapse:collapse;margin:16px 0}
+    th{background:#0A1628;color:#fff;padding:8px 12px;text-align:left;font-size:13px}
+    td{padding:7px 12px;border-bottom:1px solid #E2E8E6;font-size:13px}
+    tr:nth-child(even) td{background:#F2F5F4}
+    .footer{margin-top:40px;padding-top:12px;border-top:1px solid #E2E8E6;font-size:11px;color:#94A3B8}
+    @media print{body{margin:0}}
+  </style>
+  </head><body>
+  <h1>${agentName}</h1>
+  <div class="meta">Gerado em ${new Date().toLocaleString('pt-BR')} · Workshop Claude API · TRIGO Group</div>
+  ${lastOutput
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('')}
+  <div class="footer">Workshop Claude API — TRIGO Group</div>
+  </body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+// ── DOCX ────────────────────────────────────────────────────────────
+async function exportDOCX(slug, agentName) {
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+
+  const lines = lastOutput.split('\n');
+  const children = [];
+
+  // Title
+  children.push(new Paragraph({
+    text: agentName,
+    heading: HeadingLevel.HEADING_1,
+    spacing:{after:200}
+  }));
+
+  // Meta
+  children.push(new Paragraph({
+    children:[new TextRun({text:`Gerado em ${new Date().toLocaleString('pt-BR')} · Workshop Claude API · TRIGO Group`, color:'94A3B8', size:20})],
+    spacing:{after:400}
+  }));
+
+  // Content
+  lines.forEach(line => {
+    const clean = line.replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1').trim();
+    if (!clean) { children.push(new Paragraph({text:'',spacing:{after:100}})); return; }
+    const isHeader = line.startsWith('## ') || line.startsWith('# ');
+    children.push(new Paragraph({
+      children:[new TextRun({
+        text: isHeader ? clean.replace(/^#+\s/,'') : clean,
+        bold: isHeader,
+        size: isHeader ? 28 : 22,
+        color: isHeader ? '0A1628' : '0F172A'
+      })],
+      heading: isHeader ? HeadingLevel.HEADING_2 : undefined,
+      spacing:{after: isHeader ? 150 : 80}
+    }));
+  });
+
+  // Footer
+  children.push(new Paragraph({spacing:{before:400}}));
+  children.push(new Paragraph({
+    children:[new TextRun({text:'Workshop Claude API — TRIGO Group', color:'94A3B8', size:18})],
+    alignment: AlignmentType.CENTER
+  }));
+
+  const doc = new Document({
+    sections:[{
+      properties:{},
+      children
+    }]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `${slug}.docx`; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
